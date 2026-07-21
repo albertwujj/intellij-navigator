@@ -1,0 +1,58 @@
+<idea-plugin>
+    <id>com.claudecode.navigator</id>
+    <name>IntelliJ Navigator</name>
+    <vendor email="support@example.com" url="https://github.com/claudecode">Claude Code</vendor>
+
+    <description><![CDATA[
+    An IntelliJ plugin that accepts navigation requests via TCP socket, resolves file/symbol references,
+    and navigates to the target location. Supports multiple match selection when ambiguous.
+
+    <h3>Features:</h3>
+    <ul>
+        <li>Navigate to files by path (with partial path matching)</li>
+        <li>Navigate to symbols (classes, functions) by name</li>
+        <li>Jump to specific line numbers</li>
+        <li>Selector popup for multiple matches</li>
+    </ul>
+
+    <h3>Usage:</h3>
+    <p>Send JSON requests to TCP port 8765:</p>
+    <pre>
+    {"type": "file", "path": "foo.py", "line": 42}
+    {"type": "symbol", "name": "MyClass.method", "fileHint": "foo.py"}
+    </pre>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.python</depends>
+    <depends>Git4Idea</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="com.claudecode.navigator.NavigatorService"/>
+        <projectService serviceImplementation="com.claudecode.navigator.ReadOnlyEditorService"/>
+        <postStartupActivity implementation="com.claudecode.navigator.NavigatorStartupActivity"/>
+        <diff.DiffExtension implementation="com.claudecode.navigator.ReadOnlyDiffExtension"/>
+        <editorNotificationProvider implementation="com.claudecode.navigator.ReadOnlyEditorNotificationProvider"/>
+    </extensions>
+
+    <projectListeners>
+        <listener class="com.claudecode.navigator.NavigatorProjectListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </projectListeners>
+
+    <actions>
+        <action id="com.claudecode.navigator.ShowNetDiffAgainstPreviousCommit"
+                class="com.claudecode.navigator.vcs.ShowNetDiffAgainstPreviousCommitAction"
+                text="Show Net Diff Since Previous Commit"
+                description="Compare selected working-tree files with their versions before the last commit">
+            <add-to-group group-id="ChangesViewPopupMenu" anchor="after" relative-to-action="Diff.ShowDiff"/>
+            <add-to-group group-id="Git.Stage.Tree.Menu" anchor="after" relative-to-action="Diff.ShowDiff"/>
+        </action>
+        <action id="com.claudecode.navigator.ToggleReadOnlyEditors"
+                class="com.claudecode.navigator.ToggleReadOnlyEditorsAction"
+                text="Agent Read-Only Editors"
+                description="Prevent direct typing in project source editors">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

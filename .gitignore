@@ -1,0 +1,18 @@
+# Gradle
+.gradle/
+.gradle-local/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+
+# IntelliJ Platform
+.intellijPlatform/
+
+# Distribution
+dist/
+
+# OS
+.DS_Store

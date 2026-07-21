@@ -1,0 +1,28 @@
+<idea-plugin>
+    <id>com.claudecode.navigator.frontend</id>
+    <name>IntelliJ Navigator Frontend</name>
+    <vendor email="support@example.com" url="https://github.com/claudecode">Claude Code</vendor>
+
+    <description><![CDATA[
+    Frontend companion for IntelliJ Navigator. Accepts scroll requests via TCP port 8766
+    to scroll the active editor to the caret position. Used with the backend Navigator plugin
+    to support scroll-to-line in remote development (Gateway/WSL).
+
+    <h3>Usage:</h3>
+    <pre>
+    printf '{"action":"scroll"}\n' | nc -w 2 localhost 8766
+    </pre>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="com.claudecode.navigator.frontend.ScrollService"/>
+        <postStartupActivity implementation="com.claudecode.navigator.frontend.FrontendStartupActivity"/>
+    </extensions>
+
+    <projectListeners>
+        <listener class="com.claudecode.navigator.frontend.FrontendProjectListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </projectListeners>
+</idea-plugin>
