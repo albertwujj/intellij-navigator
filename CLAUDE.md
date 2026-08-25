@@ -10,24 +10,19 @@ export JAVA_HOME="/Applications/PyCharm CE.app/Contents/jbr/Contents/Home"
 
 - Build backend plugin: `./gradlew buildPlugin`
 - Build frontend plugin: `cd frontend-plugin && ./gradlew buildPlugin`
-- Run tests: `./gradlew test`
+- Run backend tests: `./gradlew test`
+- Run frontend tests: `cd frontend-plugin && ./gradlew test`
 - Backend output: `build/distributions/intellij-navigator-*.zip`
 - Frontend output: `frontend-plugin/build/distributions/intellij-navigator-frontend-*.zip`
 
-After building, upload the zips to the GitHub release on the AgentTerm repo.
-**Important:** Run the `gh release upload` as a separate command using an absolute
-path for the repo (`-R` flag or `cwd`), then verify with `gh release view`.
+## Releases
 
-```bash
-# Step 1: Upload (use -R to avoid cwd issues)
-gh release upload v0.1.1 \
-  build/distributions/intellij-navigator-1.0.1.zip \
-  frontend-plugin/build/distributions/intellij-navigator-frontend-1.0.1.zip \
-  --clobber -R albertwujj/agent-term
+This repository owns both plugin versions and their downloadable artifacts. Keep `pluginVersion` in `gradle.properties` and `frontend-plugin/gradle.properties` synchronized.
 
-# Step 2: Verify upload succeeded
-gh release view v0.1.1 -R albertwujj/agent-term
-```
+- `./scripts/release.sh --check` — test and build both plugins, then validate the ZIPs without publishing
+- `./scripts/release.sh` — repeat those checks, tag and push the synchronized plugin version, and publish both ZIPs to `albertwujj/intellij-navigator`
+
+AgentTerm does not host plugin assets and has no application release workflow.
 
 ## Architecture
 

@@ -28,9 +28,9 @@ In a local (non-remote) setup, install both plugins in the same IDE.
 
 ## Download
 
-Pre-built plugin zips are available on the [AgentTerm releases page](https://github.com/albertwujj/agent-term/releases).
+Pre-built backend and frontend plugin ZIPs are published together on this repository's [Releases page](https://github.com/albertwujj/intellij-navigator/releases).
 
-Publishing and release-asset patching are handled by AgentTerm's [release workflow](https://github.com/albertwujj/agent-term#releasing).
+AgentTerm itself runs directly from its `main` branch and does not publish application releases. Plugin versions and downloadable artifacts are owned by this repository.
 
 ## Documentation
 

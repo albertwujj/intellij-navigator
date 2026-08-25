@@ -7,7 +7,7 @@
 
 ## Installation
 
-Install the plugin zips from the matching AgentTerm release:
+Download both plugin ZIPs from the same [IntelliJ Navigator release](https://github.com/albertwujj/intellij-navigator/releases):
 
 - `intellij-navigator-<version>.zip` — backend plugin
 - `intellij-navigator-frontend-<version>.zip` — frontend plugin
