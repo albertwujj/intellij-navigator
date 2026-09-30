@@ -2,8 +2,9 @@
 
 ## Requirements
 
-- IntelliJ-based IDE (PyCharm, WebStorm, GoLand, IntelliJ IDEA, etc.)
-- Version 2024.1 or later
+- Tested with PyCharm.
+- Both plugins declare an IDE build range of `241`–`251.*` (2024.1–2025.1). See [JetBrains' build number reference](https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html) for the version mapping.
+- The backend requires the Python module (`com.intellij.modules.python`) and Git plugin (`Git4Idea`). Other IntelliJ-based IDEs must provide these dependencies too.
 
 ## Installation
 
