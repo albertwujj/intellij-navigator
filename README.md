@@ -23,7 +23,7 @@ The plugins are tested with PyCharm. See the [installation guide](INSTALL.md) fo
 
 Keep a project open in your IDE while you work in AgentTerm. A read-only editor guard is enabled by default to prevent accidental typing while agents edit files. You can turn it off for direct editing.
 
-See [AgentTerm's IDE guide](https://github.com/albertwujj/agent-term/blob/main/docs/ide.md) for navigation and quoting code locations into your prompt.
+See [AgentTerm's IDE guide](https://github.com/albertwujj/agent-term/blob/main/docs/ide.md) for navigation and quoting code locations into your prompt. For connection issues, see [optional diagnostics](DIAGNOSTICS.md).
 
 <a name="documentation"></a>
 

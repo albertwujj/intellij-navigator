@@ -14,6 +14,8 @@ Two TCP servers work together:
 - **Protocol:** TCP
 - **Format:** Newline-delimited JSON
 
+For manual socket checks, see [optional diagnostics](DIAGNOSTICS.md).
+
 ### Request flow
 
 Send a request to the backend. Check the response `status`:
