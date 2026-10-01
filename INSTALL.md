@@ -20,7 +20,7 @@ Where to install them:
 
 Install each zip through **Settings** → **Plugins** → **⚙️** → **Install Plugin from Disk...**, then restart the IDE.
 
-AgentTerm connects to the plugins directly over TCP. Netcat is not required.
+AgentTerm connects to the plugins directly over TCP on `127.0.0.1`; netcat is not required. The plugins trust local clients. For remote development beyond automatic localhost forwarding, use an authenticated tunnel with loopback endpoints. See [Security](SECURITY.md).
 
 ## Verify Installation
 

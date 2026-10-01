@@ -52,7 +52,7 @@ class RequestHandler(private val project: Project) {
     fun handle(jsonRequest: String): NavigationResponse {
         return try {
             val request = NavigationRequest.parse(jsonRequest)
-            logger.info("Parsed request: $request")
+            logger.debug("Navigation request type: ${request.type}")
 
             when (request) {
                 is FileRequest -> handleFileRequest(request)
@@ -62,8 +62,8 @@ class RequestHandler(private val project: Project) {
                 is ResolveFileRequest -> handleResolveFileRequest(request)
             }
         } catch (e: Exception) {
-            logger.error("Failed to handle request: $jsonRequest", e)
-            NavigationResponse(status = "error", message = e.message)
+            logger.debug("Rejected navigation request (${e.javaClass.simpleName})")
+            NavigationResponse(status = "error", message = "invalid or failed request")
         }
     }
 

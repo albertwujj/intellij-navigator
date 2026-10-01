@@ -11,8 +11,10 @@ Two TCP servers work together:
 | **Backend** | 8765 | Resolve files/symbols, open or activate files, move caret |
 | **Frontend** | 8766 | Scroll the visible editor and report the visible caret |
 
+- **Listen address:** `127.0.0.1` only; no authentication. See [Security](SECURITY.md).
 - **Protocol:** TCP
-- **Format:** Newline-delimited JSON
+- **Format:** UTF-8, newline-delimited JSON objects; one request per connection.
+- **Limits:** 64 KiB per request, five seconds to receive the complete line, 16 active connections per server.
 
 For manual socket checks, see [optional diagnostics](DIAGNOSTICS.md).
 

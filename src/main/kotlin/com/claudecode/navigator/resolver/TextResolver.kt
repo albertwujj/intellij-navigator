@@ -27,7 +27,7 @@ class TextResolver(private val project: Project) {
                 return@compute emptyList()
             }
 
-            logger.debug("Searching for text: '$trimmedText' (fileHint: $fileHint)")
+            logger.debug("Searching for text (${trimmedText.length} characters)")
 
             val scope = GlobalSearchScope.projectScope(project)
             val filesToSearch = FilenameIndex.getAllFilesByExt(project, "py", scope).toList()
@@ -41,7 +41,7 @@ class TextResolver(private val project: Project) {
                 targets.addAll(matches)
             }
 
-            logger.debug("Found ${targets.size} matches for text '$trimmedText'")
+            logger.debug("Found ${targets.size} text matches")
 
             // Apply fileHint as secondary filter
             applyFileHintFilter(targets, fileHint)

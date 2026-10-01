@@ -28,6 +28,8 @@ dependencies {
 }
 
 kotlin {
+    sourceSets.main { kotlin.srcDir("../shared/src/main/kotlin") }
+    sourceSets.test { kotlin.srcDir("../shared/src/test/kotlin") }
     jvmToolchain(21)
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)

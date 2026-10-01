@@ -65,7 +65,11 @@ Invoke-NavigatorCheck -Port 8766 -Request '{"action":"caret"}'
 
 ### Checks from WSL
 
-A check started inside WSL can take a different network path from AgentTerm's Windows process. Test from Windows PowerShell first. If you specifically need to connect from WSL to a Windows IDE, use the address appropriate to your NAT or mirrored networking setup; see [Microsoft's WSL networking guide](https://learn.microsoft.com/en-us/windows/wsl/networking).
+A check started inside WSL can take a different network path from AgentTerm's Windows process. Test from Windows PowerShell first. Both plugins listen only on `127.0.0.1`. Windows-to-WSL localhost forwarding or mirrored networking may supply the local path; a WSL NAT host address alone cannot reach a Windows listener bound to loopback. If a remote setup requires forwarding, use an authenticated tunnel bound to loopback rather than exposing the plugin on a network interface. See [Microsoft's WSL networking guide](https://learn.microsoft.com/en-us/windows/wsl/networking).
+
+## Extended frontend diagnostics
+
+`caret_diagnostics`, `explore_object`, and `diff_probe` are development tools, disabled by default. Enable them temporarily with `-Dintellij.navigator.diagnostics=true` in the VM options of the IDE/client running the frontend plugin, then restart it. They can inspect IDE object state and invoke object methods; use them only with a trusted project and local client. Remove the option and restart after the investigation. Normal navigation and caret quoting do not require it.
 
 ## Troubleshooting
 

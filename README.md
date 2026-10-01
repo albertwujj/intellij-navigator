@@ -31,6 +31,8 @@ See [AgentTerm's IDE guide](https://github.com/albertwujj/agent-term/blob/main/d
 
 Other clients can use the [JSON-over-TCP API](API.md). For development, see [build and test instructions](CLAUDE.md) and the [local split-mode workflow](LOCAL_SPLIT_MODE.md).
 
+See [Security](SECURITY.md) for the local access boundary and private vulnerability reporting.
+
 ## License
 
 [MIT](LICENSE).

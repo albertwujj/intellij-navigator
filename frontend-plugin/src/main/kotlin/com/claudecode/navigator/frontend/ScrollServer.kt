@@ -1,5 +1,7 @@
 package com.claudecode.navigator.frontend
 
+import com.claudecode.navigator.transport.ClientConnections
+import com.claudecode.navigator.transport.SocketTransport
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
@@ -11,8 +13,6 @@ import com.intellij.openapi.project.Project
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.net.ServerSocket
 import java.net.Socket
@@ -96,7 +96,7 @@ private data class DiffProbeResponse(
 
 @Serializable
 private data class ErrorResponse(
-    val status: String = "error",
+    val status: String,
     val message: String,
 )
 
@@ -108,69 +108,82 @@ class ScrollServer(
     private val json = Json { ignoreUnknownKeys = true }
     private val isRunning = AtomicBoolean(false)
     private var serverSocket: ServerSocket? = null
+    private val clients = ClientConnections()
     private var serverJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    @Synchronized
     fun start() {
-        if (isRunning.getAndSet(true)) {
-            logger.warn("Scroll server already running on port $port")
-            return
-        }
-
-        serverJob = scope.launch {
-            try {
-                serverSocket = ServerSocket(port)
-                logger.info("Navigator frontend server started on port $port")
-
-                while (isActive && isRunning.get()) {
-                    try {
-                        val clientSocket = serverSocket?.accept() ?: break
-                        launch { handleClient(clientSocket) }
-                    } catch (e: SocketException) {
-                        if (isRunning.get()) {
-                            logger.warn("Socket exception while accepting connection", e)
+        if (isRunning.getAndSet(true)) return
+        try {
+            // Bind before launching the accept job so stop() cannot race with
+            // creation of a listener that would otherwise survive shutdown.
+            val listener = SocketTransport.bind(port)
+            serverSocket = listener
+            logger.info("Navigator server listening on 127.0.0.1:${listener.localPort}")
+            serverJob = scope.launch {
+                try {
+                    while (isActive && isRunning.get()) {
+                        val client = listener.accept()
+                        if (!clients.add(client)) continue
+                        launch {
+                            try {
+                                handleClient(client)
+                            } finally {
+                                clients.remove(client)
+                                runCatching { client.close() }
+                            }
                         }
                     }
+                } catch (e: SocketException) {
+                    if (isRunning.get()) logger.warn("Navigator socket closed unexpectedly", e)
+                } finally {
+                    listener.close()
+                    clients.close()
+                    isRunning.set(false)
                 }
-            } catch (e: Exception) {
-                logger.error("Failed to start scroll server on port $port", e)
-                isRunning.set(false)
             }
+        } catch (e: Exception) {
+            logger.warn("Failed to start navigator server on port $port", e)
+            isRunning.set(false)
         }
     }
 
     private suspend fun handleClient(socket: Socket) {
         try {
             socket.use { client ->
-                val reader = BufferedReader(InputStreamReader(client.getInputStream()))
-                val writer = PrintWriter(client.getOutputStream(), true)
+                val writer = PrintWriter(client.getOutputStream(), true, Charsets.UTF_8)
 
-                val line = reader.readLine()
+                val line = SocketTransport.readRequest(client)
                 if (line != null) {
-                    logger.debug("Received frontend request: $line")
                     writer.println(handleRequest(line))
                 }
             }
         } catch (e: Exception) {
-            logger.warn("Error handling frontend client", e)
+            if (isRunning.get()) logger.debug("Rejected frontend connection (${e.javaClass.simpleName})")
         }
     }
 
-    private suspend fun handleRequest(rawJson: String): String {
+    internal suspend fun handleRequest(rawJson: String): String {
         return try {
-            when (json.decodeFromString(FrontendActionRequest.serializer(), rawJson).action) {
+            val action = json.decodeFromString(FrontendActionRequest.serializer(), rawJson).action
+            if (action in setOf("caret_diagnostics", "explore_object", "diff_probe") &&
+                !java.lang.Boolean.getBoolean("intellij.navigator.diagnostics")) {
+                return json.encodeToString(ErrorResponse.serializer(), ErrorResponse(status = "error", message = "diagnostics disabled"))
+            }
+            when (action) {
                 "scroll" -> json.encodeToString(ScrollResponse.serializer(), handleScrollRequest(rawJson))
                 "caret" -> json.encodeToString(CaretResponse.serializer(), handleCaretRequest(rawJson))
                 "caret_diagnostics" -> json.encodeToString(CaretDiagnosticsResponse.serializer(), handleCaretDiagnosticsRequest(rawJson))
                 "explore_object" -> json.encodeToString(ExploreObjectResponse.serializer(), handleExploreObjectRequest(rawJson))
                 "diff_probe" -> json.encodeToString(DiffProbeResponse.serializer(), handleDiffProbeRequest(rawJson))
-                else -> json.encodeToString(ErrorResponse.serializer(), ErrorResponse(message = "Unknown action"))
+                else -> json.encodeToString(ErrorResponse.serializer(), ErrorResponse(status = "error", message = "Unknown action"))
             }
         } catch (e: Exception) {
-            logger.error("Failed to handle frontend request: $rawJson", e)
+            logger.debug("Rejected frontend request (${e.javaClass.simpleName})")
             json.encodeToString(
                 ErrorResponse.serializer(),
-                ErrorResponse(message = e.message ?: "failed to handle request"),
+                ErrorResponse(status = "error", message = "invalid or failed request"),
             )
         }
     }
@@ -365,6 +378,7 @@ class ScrollServer(
         })
     }
 
+    @Synchronized
     fun stop() {
         if (!isRunning.getAndSet(false)) return
 
@@ -375,6 +389,7 @@ class ScrollServer(
             logger.warn("Error closing scroll server socket", e)
         }
 
+        clients.close()
         serverJob?.cancel()
         scope.cancel()
         serverSocket = null
