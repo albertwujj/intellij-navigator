@@ -31,6 +31,9 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
+    // The IDE test framework brings older Jackson artifacts; keep test tooling patched.
+    testImplementation(platform("com.fasterxml.jackson:jackson-bom:2.18.11"))
+
     testImplementation("junit:junit:4.13.2")
 }
 

@@ -25,3 +25,9 @@ Raw navigation requests and responses are not logged. IDE logs can still contain
 ## Automated checks
 
 CodeQL and tests run against both separately built plugins. Gradle dependency submission feeds GitHub's vulnerability and malware alerts; secret scanning and push protection check for supported secret patterns. These checks do not cover every vulnerability or verify the security of the user's IDE installation.
+
+## Build dependency review
+
+The IDE test framework uses Jackson; both builds constrain its test dependencies to a patched Jackson BOM. These libraries are not included in the distributed plugin ZIPs.
+
+[GHSA-r937-wjx7-w2jp](https://github.com/advisories/GHSA-r937-wjx7-w2jp) affects Kotlin's KAPT incremental annotation-processing cache. Neither build applies KAPT or runs annotation processors, so that vulnerable code path is unused. The [upstream fix](https://github.com/JetBrains/kotlin/commit/bf51df665b458fda7c3eaf436c4d88dc119d7ec6) is confined to KAPT cache deserialization. Reassess this finding before adding KAPT or annotation processors; do not treat this disposition as a general exemption for Kotlin advisories.
